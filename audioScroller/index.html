@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title></title>
+        <!--<script data-main="js/impl" src="js/require.js"></script>-->
+        <script src="js/vendor/jquery/1.8/jquery.min.js"></script>
+        <script src="js/vendor/debounce/1.1/jquery.ba-throttle-debounce.min.js"></script>
+
+        <style>
+
+            html,
+            body {
+                padding: 0;
+                margin: 0;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                /*background: url('img/futurama.jpg') no-repeat left top fixed;*/
+            }
+
+            #player {
+                position: fixed;
+                left: 0;
+                top: 0;
+            }
+
+            #container {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            #candy {
+                /*width: 100%;*/
+                /*height: 100%;*/
+
+                /*background: linear-gradient( top, #aaa456 0%, #123cba 49% );*/
+                /*background: -webkit-gradient( linear, left top, right bottom, color-stop( 0%, #c3a5b7 ), color-stop( 49%, #123cba), color-stop( 50%, #123cba), color-stop( 100%, #6a4b2c ));*/
+            }
+
+            #ding {
+                position: fixed;
+                width: 50px;
+                height: 50px;
+                background: pink;
+                top: 100px;
+            }
+
+        </style>
+
+    </head>
+    <body>
+
+        <div id="container">
+            <div id="ding"></div>
+            <div id="candy"></div>
+        </div>
+
+        <script>
+
+            // TODO: calculate the duration / documentHeight ratio
+
+            var au = document.createElement( 'audio' ),
+                container = document.getElementById( 'container'),
+                durationToHeightRatio = 5,
+                manyMany = 1999,
+                userBusy = false,
+                wheelBounce,
+                $ding = $( '#ding' );
+                dummy = document.createElement( 'div' );
+
+            dummy.className = 'dummy';
+
+    //        for( var x = 0 ; x < manyMany ; x ++ ){
+    //            dummy.id = 'dummy-' + x;
+    //            container.appendChild( dummy );
+    //        }
+
+            // TODO: add ogg
+            au.setAttribute( 'src', 'audio/1-01%20Wakin%20On%20A%20Pretty%20Day.mp3');
+            au.setAttribute( 'controls' ,'');
+            au.setAttribute( 'preload' ,'');
+            au.setAttribute( 'id' ,'player');
+
+            $( au ).on( 'loadedmetadata', function( e ){
+
+                var player = e.srcElement,
+                    duration = Math.ceil( player.duration ),
+                    viewportHeight = $( window ).height(),
+                    scrollStack = ['',''];
+
+                $( 'body' ).css({
+                    height: duration * durationToHeightRatio + viewportHeight
+                });
+
+                $( 'html, body' ).bind( 'mouseup mousedown wheel DOMMouseScroll mousewheel keydown keyup', function( e ) {
+
+                    scrollStack.shift().push( e.type );
+
+                    switch( e.type ){
+
+                        case 'mouseup':
+                            if( scrollStack[0] == 'scroll' ){
+                               userBusy = false;
+                            }
+                            break;
+
+                        case 'keyup':
+                            userBusy = false;
+                            break;
+
+                        case 'keydown':
+                            // TODO: check what key is pressed and if scrolling up or down is even possible
+                            userBusy = true;
+                            break;
+
+                        case 'wheel':
+                            userBusy = true;
+                            clearTimeout( wheelBounce );
+                            // Because there is no wheelUp event
+                            wheelBounce = setTimeout( function(){
+                                userBusy = false;
+                            }, 100);
+                            break;
+                    }
+                });
+
+
+                $( window ).on( 'scroll', $.throttle( 250, function( e ) {
+
+                    var scrollTop = $( window ).scrollTop();
+
+                    scrollStack.shift();
+                    scrollStack.push( e.type );
+
+                    if( !userBusy && scrollStack[0] == 'mousedown' ){
+                        userBusy = true;
+                    }
+
+                    if( userBusy ){
+                        player.currentTime = scrollTop / durationToHeightRatio;
+                        if( player.paused ){
+                            player.play();
+                        }
+                    }
+
+//                    $ding.css({
+//                        top: scrollTop / durationToHeightRatio
+//                    });
+
+                }.bind( player )) );
+
+            });
+
+            $( au ).on( 'timeupdate' ,function( e ){
+
+                if( !userBusy ){
+                    $( document ).scrollTop( Math.floor( e.currentTarget.currentTime * durationToHeightRatio ) );
+                }
+
+            });
+
+            container.appendChild( au );
+
+        </script>
+
+    </body>
+</html>
