@@ -5,7 +5,6 @@
         <title></title>
         <!--<script data-main="js/impl" src="js/require.js"></script>-->
         <script src="bower_components/jquery/dist/jquery.min.js"></script>
-        <!--<script src="js/vendor/debounce/1.1/jquery.ba-throttle-debounce.min.js"></script>-->
 
         <style>
 
@@ -190,7 +189,15 @@
             });
 
 
-
+            /**
+             *
+             * http://davidwalsh.name/javascript-debounce-function
+             *
+             * @param func
+             * @param wait
+             * @param immediate
+             * @returns {Function}
+             */
             function debounce(func, wait, immediate) {
                 var timeout;
                 return function() {
@@ -206,7 +213,14 @@
                 };
             }
 
-
+            /**
+             *
+             * http://stackoverflow.com/questions/10726909/random-alpha-numeric-string-in-javascript
+             *
+             * @param length
+             * @param chars
+             * @returns {string}
+             */
             function randomString(length, chars) {
                 var result = '';
                 for ( var i = length; i > 0; --i ) result += chars[Math.round( Math.random() * ( chars.length - 1) ) ];
