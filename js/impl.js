@@ -4,8 +4,8 @@
 
     var requireConf = {
         paths : {
-            jquery: 'vendor/jquery/1.8/jquery.min',
-            stapes: 'vendor/stapes/0.8.1/stapes.min'
+            jquery: 'bower_components/jquery/dist/jquery.min',
+            stapes: 'bower_components/stapes/stapes.min.js'
         }
     };
 

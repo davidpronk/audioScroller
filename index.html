@@ -4,8 +4,8 @@
         <meta charset="UTF-8">
         <title></title>
         <!--<script data-main="js/impl" src="js/require.js"></script>-->
-        <script src="js/vendor/jquery/1.8/jquery.min.js"></script>
-        <script src="js/vendor/debounce/1.1/jquery.ba-throttle-debounce.min.js"></script>
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <!--<script src="js/vendor/debounce/1.1/jquery.ba-throttle-debounce.min.js"></script>-->
 
         <style>
 
@@ -17,10 +17,6 @@
 
             * {
                 box-sizing: border-box;
-            }
-
-            body {
-                /*background: url('img/futurama.jpg') no-repeat left top fixed;*/
             }
 
             #player {
@@ -44,11 +40,29 @@
             }
 
             #ding {
-                position: fixed;
-                width: 50px;
-                height: 50px;
-                background: pink;
-                top: 100px;
+                width: 100%;
+                height: 100%;
+                background: url('img/the_cosmic_computer_1012.jpg')  fixed transparent;
+                color: #fff;
+                font-family: Verdana, Arial, sans-serif;
+                font-size: 84px;
+                font-style: italic;
+                word-wrap: break-word;
+
+                /* Safari */
+                -webkit-transform: rotate(-5deg);
+
+                /* Firefox */
+                -moz-transform: rotate(-5deg);
+
+                /* IE */
+                -ms-transform: rotate(-5deg);
+
+                /* Opera */
+                -o-transform: rotate(-5deg);
+
+                /* Internet Explorer */
+                filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=5);
             }
 
         </style>
@@ -63,109 +77,141 @@
 
         <script>
 
-            // TODO: calculate the duration / documentHeight ratio
+            var duration = 0,
+                audioFile = 'audio/the_cosmic_computer_01-02_piper.mp3';
 
-            var au = document.createElement( 'audio' ),
-                container = document.getElementById( 'container'),
-                durationToHeightRatio = 5,
-                manyMany = 1999,
-                userBusy = false,
-                wheelBounce,
-                $ding = $( '#ding' );
-                dummy = document.createElement( 'div' );
+            $( document ).ready( function(){
 
-            dummy.className = 'dummy';
+                // TODO: calculate the duration / documentHeight ratio
 
-    //        for( var x = 0 ; x < manyMany ; x ++ ){
-    //            dummy.id = 'dummy-' + x;
-    //            container.appendChild( dummy );
-    //        }
+                var au = document.createElement( 'audio' ),
+                    container = document.getElementById( 'container'),
+                    durationToHeightRatio = 5,
+                    userBusy = false,
+                    wheelBounce;
 
-            // TODO: add ogg
-            au.setAttribute( 'src', 'audio/1-01%20Wakin%20On%20A%20Pretty%20Day.mp3');
-            au.setAttribute( 'controls' ,'');
-            au.setAttribute( 'preload' ,'');
-            au.setAttribute( 'id' ,'player');
+                // TODO: add ogg
+                au.setAttribute( 'src', audioFile );
+                au.setAttribute( 'controls' ,'');
+                au.setAttribute( 'preload' ,'');
+                au.setAttribute( 'id' ,'player');
 
-            $( au ).on( 'loadedmetadata', function( e ){
+                $( au ).on( 'loadedmetadata', function( e ){
 
-                var player = e.srcElement,
-                    duration = Math.ceil( player.duration ),
-                    viewportHeight = $( window ).height(),
-                    scrollStack = ['',''];
+                    var player = e.target,
+                        viewportHeight = $( window ).height(),
+                        scrollStack = ['',''];
 
-                $( 'body' ).css({
-                    height: duration * durationToHeightRatio + viewportHeight
-                });
+                    duration = Math.ceil( player.duration );
 
-                $( 'html, body' ).bind( 'mouseup mousedown wheel DOMMouseScroll mousewheel keydown keyup', function( e ) {
+                    $( 'body' ).css({
+                        height: duration * durationToHeightRatio + viewportHeight
+                    });
 
-                    scrollStack.shift().push( e.type );
+                    var rString = randomString(4299, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 
-                    switch( e.type ){
+                    $( '#ding' ).html( rString );
 
-                        case 'mouseup':
-                            if( scrollStack[0] == 'scroll' ){
-                               userBusy = false;
-                            }
-                            break;
+                    $( 'html, body' ).bind( 'mouseup mousedown wheel DOMMouseScroll mousewheel keydown keyup', function( e ) {
 
-                        case 'keyup':
-                            userBusy = false;
-                            break;
+                        scrollStack.shift();
+                        scrollStack.push( e.type );
 
-                        case 'keydown':
-                            // TODO: check what key is pressed and if scrolling up or down is even possible
-                            userBusy = true;
-                            break;
+                        switch( e.type ){
 
-                        case 'wheel':
-                            userBusy = true;
-                            clearTimeout( wheelBounce );
-                            // Because there is no wheelUp event
-                            wheelBounce = setTimeout( function(){
+                            case 'mouseup':
+                                if( scrollStack[0] == 'scroll' ){
+                                   userBusy = false;
+                                }
+                                break;
+
+                            case 'keyup':
                                 userBusy = false;
-                            }, 100);
-                            break;
-                    }
+                                break;
+
+                            case 'keydown':
+                                // TODO: check what key is pressed and if scrolling up or down is even possible
+                                userBusy = true;
+                                break;
+
+                            case 'wheel':
+                                userBusy = true;
+                                clearTimeout( wheelBounce );
+                                // Because there is no wheelUp event
+                                wheelBounce = setTimeout( function(){
+                                    userBusy = false;
+                                }, 100);
+                                break;
+                        }
+                    });
+
+
+                    $( window ).on( 'scroll', debounce( function( e ) {
+
+                        var scrollTop = $( window ).scrollTop();
+
+                        scrollStack.shift();
+                        scrollStack.push( e.type );
+
+                        if( !userBusy && scrollStack[0] == 'mousedown' ){
+                            userBusy = true;
+                        }
+
+                        if( userBusy ){
+                            player.currentTime = scrollTop / durationToHeightRatio;
+                            if( player.paused ){
+                                player.play();
+                            }
+                        }
+
+                    }.bind( player )).bind( player ) );
+
                 });
 
+                $( au ).on( 'timeupdate' ,function( e ){
 
-                $( window ).on( 'scroll', $.throttle( 250, function( e ) {
-
-                    var scrollTop = $( window ).scrollTop();
-
-                    scrollStack.shift();
-                    scrollStack.push( e.type );
-
-                    if( !userBusy && scrollStack[0] == 'mousedown' ){
-                        userBusy = true;
+                    if( !userBusy ){
+                        $( document ).scrollTop( Math.floor( e.currentTarget.currentTime * durationToHeightRatio ) );
                     }
 
-                    if( userBusy ){
-                        player.currentTime = scrollTop / durationToHeightRatio;
-                        if( player.paused ){
-                            player.play();
-                        }
-                    }
+                });
 
-//                    $ding.css({
-//                        top: scrollTop / durationToHeightRatio
-//                    });
+                container.appendChild( au );
 
-                }.bind( player )) );
+
+                $( window ).on( 'resize', debounce( function(){
+
+                    $( 'body' ).css({
+                        height: duration * durationToHeightRatio + $( window ).height()
+                    });
+
+                }).bind ( duration ));
 
             });
 
-            $( au ).on( 'timeupdate' ,function( e ){
 
-                if( !userBusy ){
-                    $( document ).scrollTop( Math.floor( e.currentTarget.currentTime * durationToHeightRatio ) );
-                }
 
-            });
+            function debounce(func, wait, immediate) {
+                var timeout;
+                return function() {
+                    var context = this, args = arguments;
+                    var later = function() {
+                        timeout = null;
+                        if (!immediate) func.apply(context, args);
+                    };
+                    var callNow = immediate && !timeout;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                    if (callNow) func.apply(context, args);
+                };
+            }
 
-            container.appendChild( au );
+
+            function randomString(length, chars) {
+                var result = '';
+                for ( var i = length; i > 0; --i ) result += chars[Math.round( Math.random() * ( chars.length - 1) ) ];
+                return result;
+            }
 
         </script>
 

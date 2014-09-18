@@ -1,0 +1,11 @@
+{
+    "name": "audioScroller",
+    "version": "0.0.1",
+    "dependencies": {
+        "requirejs": "~2.1.0",
+        "jquery": "~2.1.0",
+        "stapes": "~0.8",
+        "skrollr": "~0.6"
+    },
+    "devDependencies": {}
+}
